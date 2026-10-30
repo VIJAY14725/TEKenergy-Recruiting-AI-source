@@ -23,6 +23,7 @@ export interface CandidateRecord {
   phone: string | null;
   location: string | null;
   visaStatus: string | null;
+  preferredWorkArrangement: string | null;
   roles: string[];
   totalExperience: number | null;
   relevantExperience: number | null;

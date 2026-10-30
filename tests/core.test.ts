@@ -10,7 +10,7 @@ function jobFixture(requirements = extractRequirementsHeuristically("Required: 5
   return { id: "job_fixture", title: "Cloud Engineer", description: "", location: null, workArrangement: null, compensation: null, startDate: null, submissionDeadline: null, recruiterId: actor, status: "ACTIVE", criteriaApprovedAt: "2026-01-01T00:00:00.000Z", requirements, rubricVersion: 1, createdAt: "", updatedAt: "" };
 }
 function candidateFixture(skills: string[], years: number | null = 6): CandidateRecord {
-  return { id: "candidate_fixture", name: "Synthetic Candidate", email: "synthetic@example.test", phone: null, location: "DC", visaStatus: null, roles: ["DevOps Engineer"], totalExperience: years, relevantExperience: years, skills, certifications: [], education: null, projectExperience: "Built AWS Kubernetes infrastructure with Terraform.", sourceChannel: "synthetic", sourceUrl: null, availability: null, compensation: null, contactPreference: "email", optOut: false, status: "IMPORTED", archived: false, createdAt: "", updatedAt: "" };
+  return { id: "candidate_fixture", name: "Synthetic Candidate", email: "synthetic@example.test", phone: null, location: "DC", visaStatus: null, preferredWorkArrangement: null, roles: ["DevOps Engineer"], totalExperience: years, relevantExperience: years, skills, certifications: [], education: null, projectExperience: "Built AWS Kubernetes infrastructure with Terraform.", sourceChannel: "synthetic", sourceUrl: null, availability: null, compensation: null, contactPreference: "email", optOut: false, status: "IMPORTED", archived: false, createdAt: "", updatedAt: "" };
 }
 
 describe("controlled recruiting intelligence", () => {
@@ -48,6 +48,10 @@ describe("controlled recruiting intelligence", () => {
     const parsed = rowsToCandidates([{ name: "Visa Test", "Work Authorization": "Requires sponsorship" }]);
     expect(parsed.candidates[0].visaStatus).toBe("Requires sponsorship");
   });
+  it("imports a candidate's preferred work arrangement", () => {
+    const parsed = rowsToCandidates([{ name: "Remote Test", "Preferred Work Arrangement": "remote" }]);
+    expect(parsed.candidates[0].preferredWorkArrangement).toBe("Remote");
+  });
 });
 
 describe("persistent controlled workflow", () => {
@@ -56,10 +60,11 @@ describe("persistent controlled workflow", () => {
     const jobId = createJob({ title: `QA Cloud Engineer ${suffix}`, description: "Required: 5+ years AWS, Kubernetes, Terraform, and CI/CD. Preferred: Python.", location: "Washington, DC", workArrangement: "Hybrid", requirements }, actor);
     approveJobCriteria(jobId, actor); setJobStatus(jobId, "ACTIVE", actor);
     expect(getJob(jobId)?.workArrangement).toBe("Hybrid");
-    const candidateId = createCandidate({ name: `QA Candidate ${suffix}`, email: `qa-${suffix}@example.test`, location: "Washington, DC", visaStatus: "Candidate-reported; verification pending", skills: ["AWS", "Kubernetes", "Terraform", "CI/CD", "Python"], totalExperience: 7, relevantExperience: 6, sourceChannel: "synthetic test" }, actor).id;
+    const candidateId = createCandidate({ name: `QA Candidate ${suffix}`, email: `qa-${suffix}@example.test`, location: "Washington, DC", visaStatus: "Candidate-reported; verification pending", preferredWorkArrangement: "Hybrid", skills: ["AWS", "Kubernetes", "Terraform", "CI/CD", "Python"], totalExperience: 7, relevantExperience: 6, sourceChannel: "synthetic test" }, actor).id;
     const job = jobFixture(requirements); job.id = jobId; const candidate = getCandidate(candidateId)!; const screening = screenCandidate(job, candidate, "AWS Kubernetes Terraform CI/CD Python 7 years"); storeScreening(screening, actor);
     expect(getLatestScreening(jobId, candidateId)?.score).toBeGreaterThan(50);
     expect(getCandidate(candidateId)?.visaStatus).toBe("Candidate-reported; verification pending");
+    expect(getCandidate(candidateId)?.preferredWorkArrangement).toBe("Hybrid");
     expect(getCandidate(candidateId)?.location).toBe("Washington, DC");
     const sourceTask = createSourcingTask(jobId, "manual", "AWS AND Kubernetes", actor); expect(sourceTask).toMatch(/^source_task_/);
     const outreach = createOutreach(jobId, candidateId, "Opportunity", "Would you like to talk?", "INITIAL", actor); approveOutreach(outreach, actor); markOutreachManualSent(outreach, actor); recordResponse(candidateId, jobId, "Interested and available next week.", "INTERESTED", actor);

@@ -27,6 +27,7 @@ export default async function CandidateProfile({ params, searchParams }: { param
           <div>Phone</div><div>{candidate.phone || "Not provided"}</div>
           <div>Location</div><div>{candidate.location || "Unknown"}</div>
           <div>Visa / work authorization</div><div>{candidate.visaStatus || "Not provided"}</div>
+          <div>Preferred job type</div><div>{candidate.preferredWorkArrangement || "Not documented"}</div>
           <div>Availability</div><div>{candidate.availability || "Unknown"}</div>
           <div>Compensation</div><div>{candidate.compensation || "Unknown"}</div>
           <div>Source</div><div>{candidate.sourceChannel}{candidate.sourceUrl ? ` · ${candidate.sourceUrl}` : ""}</div>

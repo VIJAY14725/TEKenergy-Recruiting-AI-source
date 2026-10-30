@@ -134,6 +134,11 @@ function migrate(conn: DatabaseSync) {
     conn.exec("ALTER TABLE candidates ADD COLUMN visa_status TEXT");
     conn.prepare("INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)").run("002_candidate_visa_status", now());
   }
+  const candidateWorkArrangementMigration = conn.prepare("SELECT version FROM schema_migrations WHERE version = ?").get("003_candidate_work_arrangement") as { version?: string } | undefined;
+  if (!candidateWorkArrangementMigration) {
+    conn.exec("ALTER TABLE candidates ADD COLUMN preferred_work_arrangement TEXT");
+    conn.prepare("INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)").run("003_candidate_work_arrangement", now());
+  }
 }
 
 export function run(sql: string, ...params: unknown[]) { return database().prepare(sql).run(...params as any[]); }

@@ -9,6 +9,7 @@ function candidate(row: Row): CandidateRecord {
   return {
     id: String(row.id), name: String(row.name), email: row.email ? String(row.email) : null, phone: row.phone ? String(row.phone) : null,
     location: row.location ? String(row.location) : null, visaStatus: row.visa_status ? String(row.visa_status) : null,
+    preferredWorkArrangement: row.preferred_work_arrangement ? String(row.preferred_work_arrangement) : null,
     roles: json(row.roles_json, []), totalExperience: row.total_experience === null ? null : Number(row.total_experience),
     relevantExperience: row.relevant_experience === null ? null : Number(row.relevant_experience), skills: json(row.skills_json, []), certifications: json(row.certifications_json, []),
     education: row.education ? String(row.education) : null, projectExperience: row.project_experience ? String(row.project_experience) : null,
@@ -79,9 +80,9 @@ export function createCandidate(input: Partial<CandidateRecord> & { name: string
   if (existing) return { id: String(existing.id), duplicate: true };
   const id = newId("cand"), timestamp = now();
   transaction(() => {
-    run(`INSERT INTO candidates (id,name,email,phone,location,visa_status,roles_json,total_experience,relevant_experience,skills_json,certifications_json,education,project_experience,source_channel,source_url,availability,compensation,contact_preference,opt_out,status,archived,created_at,updated_at)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)`,
-      id, input.name.trim(), input.email || null, input.phone || null, input.location || null, input.visaStatus || null, JSON.stringify(input.roles ?? []), input.totalExperience ?? null,
+    run(`INSERT INTO candidates (id,name,email,phone,location,visa_status,preferred_work_arrangement,roles_json,total_experience,relevant_experience,skills_json,certifications_json,education,project_experience,source_channel,source_url,availability,compensation,contact_preference,opt_out,status,archived,created_at,updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)`,
+      id, input.name.trim(), input.email || null, input.phone || null, input.location || null, input.visaStatus || null, input.preferredWorkArrangement || null, JSON.stringify(input.roles ?? []), input.totalExperience ?? null,
       input.relevantExperience ?? null, JSON.stringify(input.skills ?? []), JSON.stringify(input.certifications ?? []), input.education || null,
       input.projectExperience || null, input.sourceChannel || "manual", input.sourceUrl || null, input.availability || null, input.compensation || null,
       input.contactPreference || "email", input.optOut ? 1 : 0, input.status || "IMPORTED", timestamp, timestamp);
